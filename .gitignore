@@ -1,0 +1,9 @@
+# backups de texto
+*~
+*.swp
+
+# objetos
+*.o
+
+# cscope e talz
+*cscope*
