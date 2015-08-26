@@ -1,0 +1,11 @@
+local util = hell.utils
+
+exe = 'main'
+
+build {
+	input = util.glob '*.cpp',
+	flags = '-Wall -g -O2',
+	std = 'c++11',
+	links = 'm',
+	output = exe
+}
