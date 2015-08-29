@@ -1,24 +1,10 @@
 #include "matriz.hpp"
+#include "resolvedor.hpp"
 
-/**
- * Função que normaliza um sistema linear, dividindo cada linha
- * pelo coeficiente da diagonal da MA
- */
-void normalizaSistema (matrizQuadrada& MA, matriz& MB) {
-	auto ordem = MA.getOrdem ();
-	for (unsigned int i = 0; i < ordem; i++) {
-		auto divisor = MA[i][i];
-		// divide MA
-		for (unsigned int j = 0; j < ordem; j++) {
-			MA[i][j] /= divisor;
-		}
-		// divide MB
-		MB[i][0] /= divisor;
-	}
-}
+#include <cstring>
 
+int main (int argc, char *argv[]) {
 
-int main () {
 	// ordem da matriz (quadrada)
 	unsigned int ordem;
 	cin >> ordem;
@@ -54,12 +40,23 @@ int main () {
 	cout << endl << "MB:" << endl;
 	MB.print ();
 
-	// normaliza o sistema, pra diagonal de MA ter sempre coeficiente 1
-	normalizaSistema (MA, MB);
-	cout << endl << "MA normalizada:" << endl;
-	MA.print ();
-	cout << endl << "MB normalizada:" << endl;
-	MB.print ();
+	// agora só falta resolver xD
+	resolvedor *R;
+	cout << endl << "Resolução ";
+	// concorrente
+	if (argc && strcmp (argv[1], "multi") == 0) {
+		cout << "multithread";
+		R = new resolvedorMultithread (MA, MB);
+	}
+	// ou sequencial mesmo
+	else {
+		cout << "singlethread";
+		R = new resolvedor (MA, MB);
+	}
+	cout << " escolhida" << endl;
+	R->resolva ();
+
+	delete R;
 
 	return 0;
 }

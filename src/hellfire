@@ -9,6 +9,8 @@ build {
 
 if utils.getOption 'target' == 'run' then
 	run = command {
-		cmd = utils.makePath (hell.outdir, exe) .. (numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or '')
+		cmd = utils.makePath (hell.outdir, exe) .. 
+				(multi and ' multi' or '') ..
+				(numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or '')
 	}
 end
