@@ -5,14 +5,14 @@
 using namespace std;
 
 /**
- * Classe que representa uma matriz quadrada, com suas operações importantes
+ * Classe que representa uma matriz, com suas operações importantes
  */
 class matriz {
 public:
 	/**
-	 * Ctor com parâmetro: ordem da matriz
+	 * Ctor com parâmetro: altura e largura da matriz
 	 */
-	matriz (unsigned int ordem);
+	matriz (unsigned int altura, unsigned int largura);
 	/**
 	 * Dtor
 	 */
@@ -27,15 +27,34 @@ public:
 	 *
 	 * @return Linha da matriz, nullptr se fora de ordem
 	 */
-	int *operator[] (unsigned int indice);
+	double *operator[] (unsigned int indice);
 
+	/**
+	 * Lê uma matriz da stdin
+	 */
+	void read ();
 	/**
 	 * Imprime matriz, função para debug
 	 */
 	void print ();
 
-	/// Ordem da matriz
-	unsigned int ordem;
+protected:
+	/// Altura da matriz
+	unsigned int altura;
+	/// Largura da matriz
+	unsigned int largura;
 	/// A matriz de dados, em si
-	int **mat;
+	double **mat;
+};
+
+/**
+ * Classe que representa uma matriz quadrada, com suas operações diferentes
+ */
+class matrizQuadrada : public matriz {
+public:
+	/**
+	 * Ctor com parâmetro: ordem da matriz
+	 */
+	matrizQuadrada (unsigned int ordem);
+private:
 };

@@ -2,7 +2,7 @@
 
 int main () {
 	// ordem da matriz (quadrada)
-	int ordem;
+	unsigned int ordem;
 	cin >> ordem;
 	cout << "ordem = " << ordem << endl;
 
@@ -21,15 +21,22 @@ int main () {
 
 
 	// nossa matriz quadrada de inteiros
-	matriz MA (ordem);
+	matrizQuadrada MA (ordem);
 
 	// lê matriz quadrada
-	for (int i = 0; i < ordem; i++) {
-		for (int j = 0; j < ordem; j++) {
-			cin >> MA[i][j];
-		}
-	}
+	MA.read ();
+
+	cout << endl << "MA:" << endl;
 	MA.print ();
+
+	// nossa matriz B, o vetor
+	matriz MB (ordem, 1);
+	MB.read ();
+
+	cout << endl << "MB:" << endl;
+	MB.print ();
+
+	//normalizaSistema (MA, MB);
 
 	return 0;
 }
