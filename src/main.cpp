@@ -26,9 +26,10 @@ int main () {
 	// lê matriz quadrada
 	for (int i = 0; i < ordem; i++) {
 		for (int j = 0; j < ordem; j++) {
-			cin >> MA.mat[i][j];
+			cin >> MA[i][j];
 		}
 	}
+	MA.print ();
 
 	return 0;
 }

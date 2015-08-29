@@ -1,11 +1,15 @@
-local util = hell.utils
-
 exe = 'main'
 
 build {
-	input = util.glob '*.cpp',
-	flags = '-Wall -g -O2',
+	input = utils.glob '*.cpp',
+	flags = '-Wall -g -O3', -- O3, que os testes do sequencial são graaaaaaaande
 	std = 'c++11',
 	links = 'm',
 	output = exe
 }
+
+if utils.getOption 'target' == 'run' then
+	run = command {
+		cmd = utils.makePath (hell.outdir, exe) .. (numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or '')
+	}
+end
