@@ -23,14 +23,18 @@ public:
 	 * @params[in] erro Erro permitido
 	 * @params[in] maxIter Número máximo de iterações permitidas (pra não rodar infinito)
 	 */
-	virtual void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter);
+	void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter);
 
 protected:
 	/**
-	 * Função que normaliza um sistema linear, dividindo cada linha
-	 * pelo coeficiente da diagonal da MA
+	 * Iteração da resolução do sistema linear
+	 *
+	 * Itera sobre linhas do sistema, salvando resultados em MB, utilizando o
+	 * vetor auxiliar da iteração passada.
+	 *
+	 * @return Diferença entre maior valor de `aux' e MB
 	 */
-	void normalizaSistema ();
+	virtual void itera (double *atual, double *aux);
 
 	/// Matriz A (quadrada)
 	matrizQuadrada& MA;
@@ -49,5 +53,9 @@ public:
 	 * Ctor, chama o pai
 	 */
 	resolvedorMultithread (matrizQuadrada& MA, matriz& MB);
-	void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter) override;
+private:
+	/**
+	 * Versão multithread de @ref resolvedor::itera
+	 */
+	void itera (double *atual, double *aux) override;
 };

@@ -26,19 +26,11 @@ int main (int argc, char *argv[]) {
 
 	// nossa matriz quadrada de inteiros
 	matrizQuadrada MA (ordem);
-
-	// lê matriz quadrada
 	MA.read ();
 
-	cout << endl << "MA:" << endl;
-	MA.print ();
-
 	// nossa matriz B, o vetor
-	matriz MB (ordem, 1);
+	matriz MB (1, ordem);
 	MB.read ();
-
-	cout << endl << "MB:" << endl;
-	MB.print ();
 
 	// agora só falta resolver xD
 	resolvedor *R;
@@ -53,7 +45,7 @@ int main (int argc, char *argv[]) {
 		cout << "singlethread";
 		R = new resolvedor (MA, MB);
 	}
-	cout << " escolhida" << endl;
+	cout << " escolhida" << endl << endl;
 	R->resolva (linhaTeste, erro, maxIter);
 
 	delete R;
