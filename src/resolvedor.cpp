@@ -20,7 +20,7 @@ void resolvedor::normalizaSistema () {
 }
 
 
-void resolvedor::resolva () {
+void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int maxIter) {
 	normalizaSistema ();
 	cout << endl << "MA normalizada:" << endl;
 	MA.print ();
@@ -32,3 +32,12 @@ void resolvedor::resolva () {
 resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB) :
 		resolvedor (MA, MB) {}
 
+
+void resolvedorMultithread::resolva (unsigned int linhaTeste, double erro, 
+		unsigned int maxIter) {
+	normalizaSistema ();
+	cout << endl << "MA normalizada:" << endl;
+	MA.print ();
+	cout << endl << "MB normalizada:" << endl;
+	MB.print ();
+}

@@ -11,9 +11,9 @@ int main (int argc, char *argv[]) {
 	cout << "ordem = " << ordem << endl;
 
 	// fila a ser avaliada
-	int fila;
-	cin >> fila;
-	cout << "fila = " << fila << endl;
+	int linhaTeste;
+	cin >> linhaTeste;
+	cout << "linhaTeste = " << linhaTeste << endl;
 	// erro permitido
 	float erro;
 	cin >> erro;
@@ -44,7 +44,7 @@ int main (int argc, char *argv[]) {
 	resolvedor *R;
 	cout << endl << "Resolução ";
 	// concorrente
-	if (argc && strcmp (argv[1], "multi") == 0) {
+	if (argc > 1 && strcmp (argv[1], "multi") == 0) {
 		cout << "multithread";
 		R = new resolvedorMultithread (MA, MB);
 	}
@@ -54,7 +54,7 @@ int main (int argc, char *argv[]) {
 		R = new resolvedor (MA, MB);
 	}
 	cout << " escolhida" << endl;
-	R->resolva ();
+	R->resolva (linhaTeste, erro, maxIter);
 
 	delete R;
 

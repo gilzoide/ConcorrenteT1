@@ -18,8 +18,12 @@ public:
 
 	/**
 	 * Por favor, resolvedor, resolva esse sistema linear!
+	 *
+	 * @params[in] linhaTeste Linha a ser testada (pra comprovar que funcionou)
+	 * @params[in] erro Erro permitido
+	 * @params[in] maxIter Número máximo de iterações permitidas (pra não rodar infinito)
 	 */
-	virtual void resolva ();
+	virtual void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter);
 
 protected:
 	/**
@@ -41,5 +45,9 @@ protected:
  */
 class resolvedorMultithread : public resolvedor {
 public:
+	/**
+	 * Ctor, chama o pai
+	 */
 	resolvedorMultithread (matrizQuadrada& MA, matriz& MB);
+	void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter) override;
 };
