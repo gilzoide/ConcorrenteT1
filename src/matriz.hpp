@@ -21,13 +21,24 @@ public:
 	/**
 	 * Get Linha[indice]
 	 *
-	 * @note Como 
+	 * @note Como operador retorna a linha como array, pode-se usar o resultado
+	 *  para descobrir valores individuais usando o próprio operador[], que nem
+	 *  seria feito na matriz `mat' diretamente
 	 *
 	 * @param[in] indice Índice da linha desejada
 	 *
 	 * @return Linha da matriz, nullptr se fora de ordem
 	 */
 	double *operator[] (unsigned int indice);
+
+	/**
+	 * Getter da altura
+	 */
+	double getAltura ();
+	/**
+	 * Getter da largura
+	 */
+	double getLargura ();
 
 	/**
 	 * Lê uma matriz da stdin
@@ -56,5 +67,9 @@ public:
 	 * Ctor com parâmetro: ordem da matriz
 	 */
 	matrizQuadrada (unsigned int ordem);
-private:
+
+	/**
+	 * Getter da ordem
+	 */
+	unsigned int getOrdem ();
 };

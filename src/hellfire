@@ -4,7 +4,6 @@ build {
 	input = utils.glob '*.cpp',
 	flags = '-Wall -g -O3', -- O3, que os testes do sequencial são graaaaaaaande
 	std = 'c++11',
-	links = 'm',
 	output = exe
 }
 

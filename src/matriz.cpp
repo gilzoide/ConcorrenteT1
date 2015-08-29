@@ -24,6 +24,16 @@ double *matriz::operator[] (unsigned int indice) {
 }
 
 
+double matriz::getAltura () {
+	return altura;
+}
+
+
+double matriz::getLargura () {
+	return largura;
+}
+
+
 void matriz::print () {
 	for (unsigned int i = 0; i < altura; i++) {
 		for (unsigned int j = 0; j < largura; j++) {
@@ -44,3 +54,8 @@ void matriz::read () {
 
 /* Específicos de matrizQuadrada */
 matrizQuadrada::matrizQuadrada (unsigned int ordem) : matriz (ordem, ordem) {}
+
+
+unsigned int matrizQuadrada::getOrdem () {
+	return altura;
+}

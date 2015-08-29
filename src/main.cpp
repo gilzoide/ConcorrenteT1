@@ -1,5 +1,23 @@
 #include "matriz.hpp"
 
+/**
+ * Função que normaliza um sistema linear, dividindo cada linha
+ * pelo coeficiente da diagonal da MA
+ */
+void normalizaSistema (matrizQuadrada& MA, matriz& MB) {
+	auto ordem = MA.getOrdem ();
+	for (unsigned int i = 0; i < ordem; i++) {
+		auto divisor = MA[i][i];
+		// divide MA
+		for (unsigned int j = 0; j < ordem; j++) {
+			MA[i][j] /= divisor;
+		}
+		// divide MB
+		MB[i][0] /= divisor;
+	}
+}
+
+
 int main () {
 	// ordem da matriz (quadrada)
 	unsigned int ordem;
@@ -36,7 +54,12 @@ int main () {
 	cout << endl << "MB:" << endl;
 	MB.print ();
 
-	//normalizaSistema (MA, MB);
+	// normaliza o sistema, pra diagonal de MA ter sempre coeficiente 1
+	normalizaSistema (MA, MB);
+	cout << endl << "MA normalizada:" << endl;
+	MA.print ();
+	cout << endl << "MB normalizada:" << endl;
+	MB.print ();
 
 	return 0;
 }
