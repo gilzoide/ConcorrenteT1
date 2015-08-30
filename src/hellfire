@@ -2,7 +2,7 @@ exe = 'main'
 
 build {
 	input = utils.glob '*.cpp',
-	flags = '-Wall -g -O3', -- O3, que os testes do sequencial são graaaaaaaande
+	flags = '-Wall -g -O3 -lpthread',
 	std = 'c++11',
 	output = exe
 }

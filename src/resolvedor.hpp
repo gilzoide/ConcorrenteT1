@@ -32,14 +32,30 @@ protected:
 	 * Itera sobre linhas do sistema, salvando resultados em MB, utilizando o
 	 * vetor auxiliar da iteração passada.
 	 *
+	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
+	 * @param[in] aux Vetor auxiliar que contém valores da iteração passada
+	 *
 	 * @return Diferença entre maior valor de `aux' e MB
 	 */
 	virtual void itera (double *atual, double *aux);
+
+	/**
+	 * Processa uma linha, operação base da iteração
+	 *
+	 * @sa itera
+	 *
+	 * @param[in] i Índice da linha a ser processada
+	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
+	 * @param[in] aux Vetor auxiliar que contém valores da iteração passada
+	 */
+	void processaLinha (unsigned int i, double *atual, double *aux);
 
 	/// Matriz A (quadrada)
 	matrizQuadrada& MA;
 	/// Matriz B (o vetor)
 	matriz& MB;
+	/// Ordem do sistema, usado várias vezes por aí
+	unsigned int ordem;
 };
 
 
@@ -58,4 +74,19 @@ private:
 	 * Versão multithread de @ref resolvedor::itera
 	 */
 	void itera (double *atual, double *aux) override;
+
+	/**
+	 * Função que processa mais de uma linha, pra dividir
+	 * o trabalho entre os threads
+	 *
+	 * @param[in] comeco Índice da linha inicial
+	 * @param[in] fim Índice da linha final (não inclusive)
+	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
+	 * @param[in] aux Vetor auxiliar que contém valores da iteração passada
+	 */
+	void processaLinhas (unsigned int comeco, unsigned int fim, double *atual,
+			double *aux);
+
+	/// Número de threads a serem executadas
+	unsigned int numThreads{1};
 };
