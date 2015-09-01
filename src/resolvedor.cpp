@@ -40,6 +40,9 @@ double achaMaior (const double *v, size_t tamanho) {
 
 
 void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int maxIter) {
+	this->erro = erro;
+	this->maxIter = maxIter;
+
 	// vetor de resultados, dados pela próxima iteração
 	double results[ordem];
 	
@@ -50,8 +53,9 @@ void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int max
 	}
 	// vetor auxiliar, que guarda os passos de iteração já executados
 	double aux[ordem];
+	memcpy (aux, results, ordem * sizeof (double));
 
-	i = processaTodasLinhas (erro, maxIter, results, aux);
+	i = processaTodasLinhas (results, aux);
 
 	// saída esperada
 	cout << "Iterations: " << i << endl;
@@ -67,8 +71,7 @@ void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int max
 }
 
 
-unsigned int resolvedor::processaTodasLinhas (double erro, unsigned int maxIter,
-		double *results, double *aux) {
+unsigned int resolvedor::processaTodasLinhas (double *results, double *aux) {
 	// pra cada iteração
 	unsigned int i;
 	for (i = 0; i < maxIter; i++) {
@@ -103,10 +106,13 @@ void resolvedor::processaLinha (unsigned int i, double *atual, double *aux) {
 
 /*------------------- Específicos de resolvedorMultithread -------------------*/
 resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB) :
-		resolvedor (MA, MB) {
+		resolvedor (MA, MB), mtx (PTHREAD_MUTEX_INITIALIZER), cond (PTHREAD_COND_INITIALIZER) {
 	// se tem menos linhas que threads suportadas, não adianta tanta thread =P
 	numThreads = min (ordem, thread::hardware_concurrency ());
 	allThreads = new pthread_t[numThreads];
+
+	// inicialmente, todos threads estarão trabalhando
+	threadsTrabalhando = numThreads;
 }
 
 
@@ -131,12 +137,11 @@ void *funcao (void *argumentos) {
 }
 
 
-unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
-		unsigned int maxIter, double *results, double *aux) {
+unsigned int resolvedorMultithread::processaTodasLinhas (double *results, double *aux) {
 	// quantas linhas pra cada thread?
 	int fator = ceil ((double) ordem / numThreads);
 
-	threadArgs argumentos[numThreads];
+	threadArgs *argumentos = new threadArgs[numThreads];
 	unsigned int i;
 
 	// prepara os argumentos comuns pra função
@@ -146,36 +151,52 @@ unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
 		argumentos[i].aux = aux;
 		argumentos[i].inicio = i * fator;
 		argumentos[i].fim = min ((i + 1) * fator, ordem);
+		pthread_create (&allThreads[i], NULL, &funcao, &argumentos[i]);
+	}
+	
+	// espera todos threads terminarem
+	for (unsigned int i = 0; i < numThreads; i++) {
+		pthread_join (allThreads[i], NULL);
 	}
 
-	// pra cada iteração
-	for (i = 0; i < maxIter; i++) {
-		// aux segura os valores da iteração anterior
-		memcpy (aux, results, ordem * sizeof (double));
+	delete[] argumentos;
 
-
-		// solta numThreads threads, pra processar linhas
-		for (unsigned int j = 0; j < numThreads; j++) {
-			pthread_create (&allThreads[j], NULL, &funcao, &argumentos[j]);
-		}
-		
-		for (unsigned int j = 0; j < numThreads; j++) {
-			pthread_join (allThreads[j], NULL);
-		}
-
-		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
-		if (diferenca < erro) {
-			break;
-		}
-	}
-
-	return i;
+	return iter;
 }
 
 
 void resolvedorMultithread::processaLinhas (unsigned int comeco, unsigned int fim,
 		double *atual, double *aux) {
-	for (auto i = comeco; i < fim; i++) {
-		processaLinha (i, atual, aux);
+	while (continueTrabalhando) {
+		// executa linhas
+		for (auto i = comeco; i < fim; i++) {
+			processaLinha (i, atual, aux);
+		}
+
+		pthread_mutex_lock (&mtx);
+		threadsTrabalhando--;
+
+		// se acabou, iteração, prepara a próxima
+		if (!threadsTrabalhando) {
+			iter++;
+
+			double diferenca = achaMaiorDiferenca (atual, aux, ordem) / achaMaior (atual, ordem);
+			// se acabou, seja pelo `erro' ou pelas iterações
+			if (diferenca < erro || iter > maxIter) {
+				continueTrabalhando = false;
+			}
+			else {
+				// copia valores atualizados para `aux'
+				memcpy (aux, atual, ordem * sizeof (double));
+			}
+			pthread_cond_broadcast (&cond);
+			threadsTrabalhando = numThreads;
+		}
+		// não acabou: espera todo mundo
+		else {
+			pthread_cond_wait (&cond, &mtx);
+		}
+
+		pthread_mutex_unlock (&mtx);
 	}
 }

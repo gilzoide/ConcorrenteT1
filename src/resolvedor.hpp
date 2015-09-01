@@ -40,8 +40,7 @@ protected:
 	 *
 	 * @return Diferença entre maior valor de `aux' e MB
 	 */
-	virtual unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
-			double *results, double *aux);
+	virtual unsigned int processaTodasLinhas (double *results, double *aux);
 
 	/**
 	 * Processa uma linha, operação base da iteração
@@ -58,6 +57,10 @@ protected:
 	matriz& MB;
 	/// Ordem do sistema, usado várias vezes por aí
 	unsigned int ordem;
+	/// Erro permitido
+	double erro;
+	/// Número máximo de iterações permitidas
+	unsigned int maxIter;
 };
 
 
@@ -91,10 +94,22 @@ private:
 	/**
 	 * Override do @ref resolvedor::processaTodasLinhas
 	 */
-	unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
-			double *results, double *aux) override;
+	unsigned int processaTodasLinhas (double *results, double *aux) override;
 
+	/// Contador da iteração atual
+	unsigned int iter {0};
+
+	/// Todos os threads
 	pthread_t *allThreads;
+	/// Mutex, pra evitar condições de corrida
+	pthread_mutex_t mtx;
+	/// Variável de condição, pra sincronizar iterações
+	pthread_cond_t cond;
+
 	/// Número de threads a serem executadas
 	unsigned int numThreads{1};
+	/// Indica quantas threads ainda estão trabalhando
+	int threadsTrabalhando;
+	/// Flag que sinaliza se deve continuar trabalhando
+	bool continueTrabalhando {true};
 };

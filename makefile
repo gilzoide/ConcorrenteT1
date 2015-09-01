@@ -5,7 +5,7 @@ all :
 	$(MAKE) -C src $@
 
 run :
-	@$(BUILD)/$(exe) $(multi)
+	@$(BUILD)/$(exe)
 
 .PHONY : clean
 clean :
