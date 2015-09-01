@@ -1,7 +1,7 @@
 #pragma once
 
 #include "matriz.hpp"
-#include <pthread.h>
+#include <thread>
 
 /**
  * Resolvedor de sistemas lineares, resolução sequencial
@@ -20,30 +20,31 @@ public:
 	/**
 	 * Por favor, resolvedor, resolva esse sistema linear!
 	 *
-	 * @params[in] linhaTeste Linha a ser testada (pra comprovar que funcionou)
-	 * @params[in] erro Erro permitido
-	 * @params[in] maxIter Número máximo de iterações permitidas (pra não rodar infinito)
+	 * @param[in] linhaTeste Linha a ser testada (pra comprovar que funcionou)
+	 * @param[in] erro Erro permitido
+	 * @param[in] maxIter Número máximo de iterações permitidas (pra não rodar infinito)
 	 */
 	void resolva (unsigned int linhaTeste, double erro, unsigned int maxIter);
 
 protected:
 	/**
-	 * Iteração da resolução do sistema linear
+	 * Processa as linhas do sistema, iterando 
 	 *
-	 * Itera sobre linhas do sistema, salvando resultados em MB, utilizando o
+	 * Itera sobre linhas do sistema, salvando resultados em `results', utilizando o
 	 * vetor auxiliar da iteração passada.
 	 *
-	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
-	 * @param[in] aux Vetor auxiliar que contém valores da iteração passada
+	 * @param[in] erro Erro permitido
+	 * @param[in] maxIter Número máximo de iterações permitidas
+	 * @param[out] results Vetor auxiliar que contém valores da iteração atual
+	 * @param aux Vetor auxiliar que contém valores da iteração passada
 	 *
 	 * @return Diferença entre maior valor de `aux' e MB
 	 */
-	virtual void itera (double *atual, double *aux);
+	virtual unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
+			double *results, double *aux);
 
 	/**
 	 * Processa uma linha, operação base da iteração
-	 *
-	 * @sa itera
 	 *
 	 * @param[in] i Índice da linha a ser processada
 	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
@@ -70,11 +71,16 @@ public:
 	 * Ctor, chama o pai
 	 */
 	resolvedorMultithread (matrizQuadrada& MA, matriz& MB);
+	/**
+	 * Dtor
+	 */
+	~resolvedorMultithread ();
 private:
 	/**
-	 * Versão multithread de @ref resolvedor::itera
+	 * Override do @ref resolvedor::processaTodasLinhas
 	 */
-	void itera (double *atual, double *aux) override;
+	unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
+			double *results, double *aux) override;
 
 	/**
 	 * Função que processa mais de uma linha, pra dividir
@@ -88,6 +94,7 @@ private:
 	void processaLinhas (unsigned int comeco, unsigned int fim, double *atual,
 			double *aux);
 
+	thread *allThreads;
 	/// Número de threads a serem executadas
 	unsigned int numThreads{1};
 };

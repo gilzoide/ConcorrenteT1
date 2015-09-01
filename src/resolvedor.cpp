@@ -51,17 +51,7 @@ void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int max
 	// vetor auxiliar, que guarda os passos de iteração já executados
 	double aux[ordem];
 
-	for (i = 0; i < maxIter; i++) {
-		// aux segura os valores da iteração anterior
-		memcpy (aux, results, sizeof aux);
-		// resolve uma iteração (que será multithreaded no resolvedorMultithread)
-		itera (results, aux);
-
-		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
-		if (diferenca < erro) {
-			break;
-		}
-	}
+	i = processaTodasLinhas (erro, maxIter, results, aux);
 
 	// saída esperada
 	cout << "Iterations: " << i << endl;
@@ -77,11 +67,25 @@ void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int max
 }
 
 
-void resolvedor::itera (double *atual, double *aux) {
-	// pra cada linha, faz a operação
-	for (unsigned int i = 0; i < ordem; i++) {
-		processaLinha (i, atual, aux);
+unsigned int resolvedor::processaTodasLinhas (double erro, unsigned int maxIter,
+		double *results, double *aux) {
+	// pra cada iteração
+	unsigned int i;
+	for (i = 0; i < maxIter; i++) {
+		// aux segura os valores da iteração anterior
+		memcpy (aux, results, ordem * sizeof (double));
+		// pra cada linha, faz a operação
+		for (unsigned int j = 0; j < ordem; j++) {
+			processaLinha (j, results, aux);
+		}
+
+		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
+		if (diferenca < erro) {
+			break;
+		}
 	}
+
+	return i;
 }
 
 
@@ -97,30 +101,50 @@ void resolvedor::processaLinha (unsigned int i, double *atual, double *aux) {
 }
 
 
-/* Específicos de resolvedorMultithread */
+/*------------------- Específicos de resolvedorMultithread -------------------*/
 resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB) :
 		resolvedor (MA, MB) {
 	// se tem menos linhas que threads suportadas, não adianta tanta thread =P
 	numThreads = min (ordem, thread::hardware_concurrency ());
+	allThreads = new thread[numThreads];
 }
 
 
-void resolvedorMultithread::itera (double *atual, double *aux) {
+resolvedorMultithread::~resolvedorMultithread () {
+	delete[] allThreads;
+}
+
+
+unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
+		unsigned int maxIter, double *results, double *aux) {
 	// quantas linhas pra cada thread?
 	int fator = ceil ((double) ordem / numThreads);
 
-	thread allThreads[numThreads];
 	// transforma um método em função pra soltar no thread
 	auto mem_task = mem_fn (&resolvedorMultithread::processaLinhas);
-	// solta numThreads threads, pra processar linhas
-	for (unsigned int i = 0; i < numThreads; i++) {
-		auto fim = min ((i + 1) * fator, ordem);
-		allThreads[i] = move (thread (mem_task, this, i * fator, fim, atual, aux));
+
+	// pra cada iteração
+	unsigned int i;
+	for (i = 0; i < maxIter; i++) {
+		// aux segura os valores da iteração anterior
+		memcpy (aux, results, ordem * sizeof (double));
+		// solta numThreads threads, pra processar linhas
+		for (unsigned int j = 0; j < numThreads; j++) {
+			auto fim = min ((j + 1) * fator, ordem);
+			allThreads[j] = move (thread (mem_task, this, j * fator, fim, results, aux));
+		}
+		
+		for (unsigned int j = 0; j < numThreads; j++) {
+			allThreads[j].join ();
+		}
+
+		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
+		if (diferenca < erro) {
+			break;
+		}
 	}
-	
-	for (auto & t : allThreads) {
-		t.join ();
-	}
+
+	return i;
 }
 
 
