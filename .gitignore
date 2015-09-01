@@ -3,6 +3,7 @@
 *.swp
 
 # objetos
+build
 *.o
 
 # cscope e talz
