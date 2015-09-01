@@ -144,6 +144,8 @@ unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
 		argumentos[i].obj = this;
 		argumentos[i].atual = results;
 		argumentos[i].aux = aux;
+		argumentos[i].inicio = i * fator;
+		argumentos[i].fim = min ((i + 1) * fator, ordem);
 	}
 
 	// pra cada iteração
@@ -154,8 +156,6 @@ unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
 
 		// solta numThreads threads, pra processar linhas
 		for (unsigned int j = 0; j < numThreads; j++) {
-			argumentos[j].inicio = j * fator;
-			argumentos[j].fim = min ((j + 1) * fator, ordem);
 			pthread_create (&allThreads[j], NULL, &funcao, &argumentos[j]);
 		}
 		
