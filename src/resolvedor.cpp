@@ -84,6 +84,7 @@ unsigned int resolvedor::processaTodasLinhas (double *results, double *aux) {
 
 		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
 		if (diferenca < erro) {
+			i++;
 			break;
 		}
 	}
@@ -141,6 +142,7 @@ unsigned int resolvedorMultithread::processaTodasLinhas (double *results, double
 	// quantas linhas pra cada thread?
 	int fator = ceil ((double) ordem / numThreads);
 
+	// argumentos auxiliares, pras pthreads
 	threadArgs *argumentos = new threadArgs[numThreads];
 	unsigned int i;
 
