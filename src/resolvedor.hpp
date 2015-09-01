@@ -1,6 +1,7 @@
 #pragma once
 
 #include "matriz.hpp"
+#include <pthread.h>
 
 /**
  * Resolvedor de sistemas lineares, resolução sequencial

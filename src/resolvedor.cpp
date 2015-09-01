@@ -24,23 +24,40 @@ double achaMaiorDiferenca (const double *v1, const double *v2, size_t tamanho) {
 
 	return ret;
 }
+/**
+ * Outra função auxiliar
+ */
+double achaMaior (const double *v, size_t tamanho) {
+	double ret = 0;
+	for (unsigned int i = 0; i < tamanho; i++) {
+		if (v[i] > ret) {
+			ret = v[i];
+		}
+	}
+
+	return ret;
+}
 
 
 void resolvedor::resolva (unsigned int linhaTeste, double erro, unsigned int maxIter) {
 	// vetor de resultados, dados pela próxima iteração
 	double results[ordem];
-	memcpy (results, MB[0], sizeof results);
+	
+	unsigned int i;
+	// copia 
+	for (i = 0; i < ordem; i++) {
+		results[i] = MB[0][i] / MA[i][i];
+	}
 	// vetor auxiliar, que guarda os passos de iteração já executados
 	double aux[ordem];
 
-	unsigned int i;
 	for (i = 0; i < maxIter; i++) {
 		// aux segura os valores da iteração anterior
 		memcpy (aux, results, sizeof aux);
 		// resolve uma iteração (que será multithreaded no resolvedorMultithread)
 		itera (results, aux);
 
-		double diferenca = achaMaiorDiferenca (results, aux, ordem);
+		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
 		if (diferenca < erro) {
 			break;
 		}
