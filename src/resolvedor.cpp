@@ -106,7 +106,7 @@ resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB) :
 		resolvedor (MA, MB) {
 	// se tem menos linhas que threads suportadas, não adianta tanta thread =P
 	numThreads = min (ordem, thread::hardware_concurrency ());
-	allThreads = new thread[numThreads];
+	allThreads = new pthread_t[numThreads];
 }
 
 
@@ -115,27 +115,52 @@ resolvedorMultithread::~resolvedorMultithread () {
 }
 
 
+/// Struct auxiliar para chamada das pthreads
+typedef struct {
+	resolvedorMultithread *obj;	///< resolvedor de sistema
+	unsigned int inicio, fim;	///< Índice de linha inicial e final
+	double *atual, *aux;		///< Vetores auxiliares
+} threadArgs;
+
+
+/// Função chamada pelos threads
+void *funcao (void *argumentos) {
+	auto args = (threadArgs *) argumentos; // faz o cast
+	args->obj->processaLinhas (args->inicio, args->fim, args->atual, args->aux);
+	return NULL;
+}
+
+
 unsigned int resolvedorMultithread::processaTodasLinhas (double erro,
 		unsigned int maxIter, double *results, double *aux) {
 	// quantas linhas pra cada thread?
 	int fator = ceil ((double) ordem / numThreads);
 
-	// transforma um método em função pra soltar no thread
-	auto mem_task = mem_fn (&resolvedorMultithread::processaLinhas);
+	threadArgs argumentos[numThreads];
+	unsigned int i;
+
+	// prepara os argumentos comuns pra função
+	for (i = 0; i < numThreads; i++) {
+		argumentos[i].obj = this;
+		argumentos[i].atual = results;
+		argumentos[i].aux = aux;
+	}
 
 	// pra cada iteração
-	unsigned int i;
 	for (i = 0; i < maxIter; i++) {
 		// aux segura os valores da iteração anterior
 		memcpy (aux, results, ordem * sizeof (double));
+
+
 		// solta numThreads threads, pra processar linhas
 		for (unsigned int j = 0; j < numThreads; j++) {
-			auto fim = min ((j + 1) * fator, ordem);
-			allThreads[j] = move (thread (mem_task, this, j * fator, fim, results, aux));
+			argumentos[j].inicio = j * fator;
+			argumentos[j].fim = min ((j + 1) * fator, ordem);
+			pthread_create (&allThreads[j], NULL, &funcao, &argumentos[j]);
 		}
 		
 		for (unsigned int j = 0; j < numThreads; j++) {
-			allThreads[j].join ();
+			pthread_join (allThreads[j], NULL);
 		}
 
 		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);

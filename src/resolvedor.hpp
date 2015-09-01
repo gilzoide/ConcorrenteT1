@@ -1,7 +1,7 @@
 #pragma once
 
 #include "matriz.hpp"
-#include <thread>
+#include <pthread.h>
 
 /**
  * Resolvedor de sistemas lineares, resolução sequencial
@@ -75,12 +75,6 @@ public:
 	 * Dtor
 	 */
 	~resolvedorMultithread ();
-private:
-	/**
-	 * Override do @ref resolvedor::processaTodasLinhas
-	 */
-	unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
-			double *results, double *aux) override;
 
 	/**
 	 * Função que processa mais de uma linha, pra dividir
@@ -93,8 +87,14 @@ private:
 	 */
 	void processaLinhas (unsigned int comeco, unsigned int fim, double *atual,
 			double *aux);
+private:
+	/**
+	 * Override do @ref resolvedor::processaTodasLinhas
+	 */
+	unsigned int processaTodasLinhas (double erro, unsigned int maxIter,
+			double *results, double *aux) override;
 
-	thread *allThreads;
+	pthread_t *allThreads;
 	/// Número de threads a serem executadas
 	unsigned int numThreads{1};
 };
