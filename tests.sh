@@ -10,10 +10,10 @@ do
 	# ten times to have an average
 	for((i=0 ;i<10;i++))
 	do
-		(gtime -f "\n%e" ./build/main < matrizes/$test_file) 2> tmp-$test_file 1> result-$test_file
+		(/usr/bin/time -f "\n%e" ./build/main < matrizes/$test_file) 2> tmp-$test_file 1> result-$test_file
 		total_time_single=$(python -c "print $total_time_single + $(tail -n 1 tmp-$test_file)")
 
-		(gtime -f "\n%e" ./build/main multi < matrizes/$test_file) 2> tmp-$test_file 1> result-$test_file
+		(/usr/bin/time -f "\n%e" ./build/main multi < matrizes/$test_file) 2> tmp-$test_file 1> result-$test_file
 		total_time_multi=$(python -c "print $total_time_multi + $(tail -n 1 tmp-$test_file)")
 	done
 
