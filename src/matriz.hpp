@@ -55,7 +55,7 @@ protected:
 	/// Largura da matriz
 	unsigned int largura;
 	/// A matriz de dados, em si
-	double **mat;
+	double *mat;
 };
 
 /**
