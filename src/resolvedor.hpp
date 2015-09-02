@@ -73,7 +73,7 @@ public:
 	/**
 	 * Ctor, chama o pai
 	 */
-	resolvedorMultithread (matrizQuadrada& MA, matriz& MB);
+	resolvedorMultithread (matrizQuadrada& MA, matriz& MB, int numberOfThreads);
 	/**
 	 * Dtor
 	 */

@@ -106,10 +106,10 @@ void resolvedor::processaLinha (unsigned int i, double *atual, double *aux) {
 
 
 /*------------------- Específicos de resolvedorMultithread -------------------*/
-resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB) :
+resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB, int numberOfThreadsToUse) :
 		resolvedor (MA, MB), mtx (PTHREAD_MUTEX_INITIALIZER), cond (PTHREAD_COND_INITIALIZER) {
 	// se tem menos linhas que threads suportadas, não adianta tanta thread =P
-	numThreads = min (ordem, thread::hardware_concurrency ());
+	numThreads = numberOfThreadsToUse == 0 ? min (ordem, thread::hardware_concurrency ()) : numberOfThreadsToUse;
 	allThreads = new pthread_t[numThreads];
 
 	// inicialmente, todos threads estarão trabalhando

@@ -33,18 +33,27 @@ int main (int argc, char *argv[]) {
 	MB.read ();
 
 	// agora só falta resolver xD
-	resolvedor *R;
+	resolvedor *R = nullptr;
 	cout << endl << "Resolução ";
-	// concorrente
-	if (argc > 1 && strcmp (argv[1], "multi") == 0) {
-		cout << "multithread";
-		R = new resolvedorMultithread (MA, MB);
-	}
+
+	// checa entradas possíveis
+    for (int i = 1; i < argc; i++) {
+        if (string(argv[i]) == "--multi") {
+            cout << "multithread";
+            int numberOfThreadsToUse = 0;
+            if (string(argv[++i]) == "--nthreads") {
+                numberOfThreadsToUse = stoi(string(argv[++i]));
+            } 
+            R = new resolvedorMultithread (MA, MB, numberOfThreadsToUse);
+    	}
+    }
+
 	// ou sequencial mesmo
-	else {
+	if (!R) {
 		cout << "singlethread";
 		R = new resolvedor (MA, MB);
 	}
+
 	cout << " escolhida" << endl << endl;
 	R->resolva (linhaTeste, erro, maxIter);
 
