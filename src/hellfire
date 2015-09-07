@@ -7,10 +7,9 @@ build {
 	output = exe
 }
 
-if utils.getOption 'target' == 'run' then
-	run = command {
-		cmd = 'time -f "Tempo gasto: %e s" ' .. utils.makePath (hell.outdir, exe)
-				.. (multi and ' multi' or '')
-				.. (numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or '')
-	}
-end
+target ('run', command {
+	cmd = 'time -f "Tempo gasto: %e s" ' .. utils.makePath (hell.outdir, exe)
+			.. (multi and ' multi' or '')
+			.. (numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or ''),
+	runTarget = true
+})
