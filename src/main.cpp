@@ -34,27 +34,28 @@ int main (int argc, char *argv[]) {
 
 	// agora só falta resolver xD
 	resolvedor *R = nullptr;
-	cout << endl << "Resolução ";
 
 	// checa entradas possíveis
     for (int i = 1; i < argc; i++) {
-        if (string(argv[i]) == "--multi") {
-            cout << "multithread";
+        if (string (argv[i]) == "--multi") {
             int numberOfThreadsToUse = 0;
-            if (string(argv[++i]) == "--nthreads") {
-                numberOfThreadsToUse = stoi(string(argv[++i]));
+            if (argc > i + 2 && string (argv[++i]) == "--nthreads") {
+				// bloco try/catch ignora erros do `stoi` (tipo um não número)
+				try {
+	                numberOfThreadsToUse = stoi (string (argv[++i]));
+				}
+				catch (...) {}
             } 
             R = new resolvedorMultithread (MA, MB, numberOfThreadsToUse);
+			break;
     	}
     }
 
 	// ou sequencial mesmo
 	if (!R) {
-		cout << "singlethread";
 		R = new resolvedor (MA, MB);
 	}
 
-	cout << " escolhida" << endl << endl;
 	R->resolva (linhaTeste, erro, maxIter);
 
 	delete R;

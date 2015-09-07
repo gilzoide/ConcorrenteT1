@@ -8,3 +8,7 @@ build
 
 # cscope e talz
 *cscope*
+
+# testes
+result-*
+tmp-*
