@@ -2,13 +2,13 @@ exe = 'main'
 
 build {
 	input = utils.glob '*.cpp',
-	flags = '-Wall -g -O3 -lpthread',
+	flags = '-Wall -g -O3 -fopenmp',
 	std = 'c++11',
 	output = exe
 }
 
 target ('run', command {
-	cmd = 'time -f "Tempo gasto: %e s" ' .. utils.makePath (hell.outdir, exe)
+	command = 'time -f "Tempo gasto: %e s" ' .. utils.makePath (hell.outdir, exe)
 			.. (multi and ' multi' or '')
 			.. (numLinhas and ' < matrizes/matriz' .. numLinhas .. '.txt' or ''),
 	runTarget = true

@@ -1,7 +1,7 @@
 #include "resolvedor.hpp"
 #include <cstring>
 #include <cmath>
-#include <thread>
+#include <omp.h>
 
 resolvedor::resolvedor (matrizQuadrada& MA, matriz& MB) : MA (MA), MB (MB),
 		ordem (MA.getOrdem ()) {}
@@ -106,99 +106,39 @@ void resolvedor::processaLinha (unsigned int i, double *atual, double *aux) {
 
 
 /*------------------- Específicos de resolvedorMultithread -------------------*/
+int min (int a, int b) {
+	return a < b ? a : b;
+}
+
+
 resolvedorMultithread::resolvedorMultithread (matrizQuadrada& MA, matriz& MB, int numberOfThreadsToUse) :
-		resolvedor (MA, MB), mtx (PTHREAD_MUTEX_INITIALIZER), cond (PTHREAD_COND_INITIALIZER) {
+		resolvedor (MA, MB) {
 	// se tem menos linhas que threads suportadas, não adianta tanta thread =P
-	numThreads = numberOfThreadsToUse == 0 ? min (ordem, thread::hardware_concurrency ()) : numberOfThreadsToUse;
-	allThreads = new pthread_t[numThreads];
-
-	// inicialmente, todos threads estarão trabalhando
-	threadsTrabalhando = numThreads;
-}
-
-
-resolvedorMultithread::~resolvedorMultithread () {
-	delete[] allThreads;
-}
-
-
-/// Struct auxiliar para chamada das pthreads
-typedef struct {
-	resolvedorMultithread *obj;	///< resolvedor de sistema
-	unsigned int inicio, fim;	///< Índice de linha inicial e final
-	double *atual, *aux;		///< Vetores auxiliares
-} threadArgs;
-
-
-/// Função chamada pelos threads
-void *funcao (void *argumentos) {
-	auto args = (threadArgs *) argumentos; // faz o cast
-	args->obj->processaLinhas (args->inicio, args->fim, args->atual, args->aux);
-	return NULL;
+	if (numberOfThreadsToUse > 0) {
+		omp_set_num_threads (min (ordem, numberOfThreadsToUse));
+	}
 }
 
 
 unsigned int resolvedorMultithread::processaTodasLinhas (double *results, double *aux) {
-	// quantas linhas pra cada thread?
-	int fator = ceil ((double) ordem / numThreads);
-
-	// argumentos auxiliares, pras pthreads
-	threadArgs *argumentos = new threadArgs[numThreads];
+	// pra cada iteração
 	unsigned int i;
+	for (i = 0; i < maxIter; i++) {
+		// aux segura os valores da iteração anterior
+		memcpy (aux, results, ordem * sizeof (double));
 
-	// prepara os argumentos comuns pra função
-	for (i = 0; i < numThreads; i++) {
-		argumentos[i].obj = this;
-		argumentos[i].atual = results;
-		argumentos[i].aux = aux;
-		argumentos[i].inicio = i * fator;
-		argumentos[i].fim = min ((i + 1) * fator, ordem);
-		pthread_create (&allThreads[i], NULL, &funcao, &argumentos[i]);
-	}
-	
-	// espera todos threads terminarem
-	for (unsigned int i = 0; i < numThreads; i++) {
-		pthread_join (allThreads[i], NULL);
-	}
-
-	delete[] argumentos;
-
-	return iter;
-}
-
-
-void resolvedorMultithread::processaLinhas (unsigned int comeco, unsigned int fim,
-		double *atual, double *aux) {
-	while (continueTrabalhando) {
-		// executa linhas
-		for (auto i = comeco; i < fim; i++) {
-			processaLinha (i, atual, aux);
+		// processa linhas em multithreaded
+		#pragma omp parallel for
+		for (unsigned int j = 0; j < ordem; j++) {
+			processaLinha (j, results, aux);
 		}
 
-		pthread_mutex_lock (&mtx);
-		threadsTrabalhando--;
-
-		// se acabou, iteração, prepara a próxima
-		if (!threadsTrabalhando) {
-			iter++;
-
-			double diferenca = achaMaiorDiferenca (atual, aux, ordem) / achaMaior (atual, ordem);
-			// se acabou, seja pelo `erro' ou pelas iterações
-			if (diferenca < erro || iter > maxIter) {
-				continueTrabalhando = false;
-			}
-			else {
-				// copia valores atualizados para `aux'
-				memcpy (aux, atual, ordem * sizeof (double));
-			}
-			pthread_cond_broadcast (&cond);
-			threadsTrabalhando = numThreads;
+		double diferenca = achaMaiorDiferenca (results, aux, ordem) / achaMaior (results, ordem);
+		if (diferenca < erro) {
+			i++;
+			break;
 		}
-		// não acabou: espera todo mundo
-		else {
-			pthread_cond_wait (&cond, &mtx);
-		}
-
-		pthread_mutex_unlock (&mtx);
 	}
+
+	return i;
 }

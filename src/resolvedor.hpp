@@ -74,42 +74,7 @@ public:
 	 * Ctor, chama o pai
 	 */
 	resolvedorMultithread (matrizQuadrada& MA, matriz& MB, int numberOfThreads);
-	/**
-	 * Dtor
-	 */
-	~resolvedorMultithread ();
 
-	/**
-	 * Função que processa mais de uma linha, pra dividir
-	 * o trabalho entre os threads
-	 *
-	 * @param[in] comeco Índice da linha inicial
-	 * @param[in] fim Índice da linha final (não inclusive)
-	 * @param[out] atual Vetor auxiliar que contém valores da iteração atual
-	 * @param[in] aux Vetor auxiliar que contém valores da iteração passada
-	 */
-	void processaLinhas (unsigned int comeco, unsigned int fim, double *atual,
-			double *aux);
-private:
-	/**
-	 * Override do @ref resolvedor::processaTodasLinhas
-	 */
+protected:
 	unsigned int processaTodasLinhas (double *results, double *aux) override;
-
-	/// Contador da iteração atual
-	unsigned int iter {0};
-
-	/// Todos os threads
-	pthread_t *allThreads;
-	/// Mutex, pra evitar condições de corrida
-	pthread_mutex_t mtx;
-	/// Variável de condição, pra sincronizar iterações
-	pthread_cond_t cond;
-
-	/// Número de threads a serem executadas
-	unsigned int numThreads{1};
-	/// Indica quantas threads ainda estão trabalhando
-	int threadsTrabalhando;
-	/// Flag que sinaliza se deve continuar trabalhando
-	bool continueTrabalhando {true};
 };
